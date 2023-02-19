@@ -6,8 +6,6 @@
 
 This is a post-modern Python library for parsing/validating unstructured data, such as JSON returned by an HTTP server or a YAML configuration.
 
-This library stems from my dissatisfaction with the popular existing solutions.
-
 ## Installation
 
 1. Make sure you're using Python >= 3.9
