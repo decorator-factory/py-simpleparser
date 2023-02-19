@@ -30,6 +30,8 @@ __all__ = (
     "is_type",
     "is_described_type",
     "is_int",
+    "is_none",
+    "is_optional",
     "is_str",
     "is_list",
     "is_list_of",
@@ -37,6 +39,7 @@ __all__ = (
     "is_dict_of",
     "is_map",
     "has_field",
+    "has_optional_field",
     "is_any_of",
     "is_any_of_described",
     "is_variant",
@@ -197,6 +200,16 @@ def is_int(source: object) -> int:
     return source
 
 
+def is_none(source: object) -> None:
+    if source is not None:
+        raise ParseError(Expectation(expected="null", actual=str(type(source))))
+    return None
+
+
+def is_optional(is_present: Parser[_T]) -> Parser[Union[_T, None]]:
+    return is_any_of(is_present, is_none)
+
+
 is_str: Parser[str] = is_described_type(str, "a string")
 
 is_list: Parser[list[Any]] = is_described_type(list, "a list")
@@ -245,6 +258,18 @@ def has_field(name: str, is_value: Parser[_T]) -> Parser[_T]:
             return is_value(raw_dict[name])
 
     return _has_field
+
+
+def has_optional_field(name: str, is_value: Parser[_T]) -> Parser[Union[_T, None]]:
+    def _has_optional_field(source: object) -> Union[_T, None]:
+        raw_dict = is_dict(source)
+        if name not in raw_dict:
+            return None
+
+        with apply_prefix(name):
+            return is_value(raw_dict[name])
+
+    return _has_optional_field
 
 
 def is_any_of(first: Parser[_T], /, *rest: Parser[_T]) -> Parser[_T]:
