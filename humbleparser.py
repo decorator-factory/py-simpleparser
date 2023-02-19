@@ -45,11 +45,14 @@ __all__ = (
     "is_variant",
     "is_variant_with_fallback",
     "is_anything",
+    "is_always",
     "dump_error_value_human",
     "dump_error_value_nested",
+    "map_parser",
 )
 
 
+_Co = TypeVar("_Co", covariant=True)
 _T = TypeVar("_T")
 _U = TypeVar("_U")
 _K = TypeVar("_K", bound=Union[int, str])
@@ -272,13 +275,11 @@ def has_optional_field(name: str, is_value: Parser[_T]) -> Parser[Union[_T, None
     return _has_optional_field
 
 
-def is_any_of(first: Parser[_T], /, *rest: Parser[_T]) -> Parser[_T]:
-    if not rest:
-        return first
+def is_any_of(*options: Parser[_Co]) -> Parser[_Co]:
+    if len(options) < 2:
+        raise RuntimeError("Expected at least 2 options")
 
-    options = (first, *rest)
-
-    def _is_any_of(source: object) -> _T:
+    def _is_any_of(source: object) -> _Co:
         errors: list[ErrorValue] = []
         for option in options:
             try:
@@ -351,3 +352,17 @@ def is_variant_with_fallback(
 
 def is_anything(source: object) -> object:
     return source
+
+
+def is_always(value: _T) -> Parser[_T]:
+    def _is_always(_source: object) -> _T:
+        return value
+
+    return _is_always
+
+
+def map_parser(fn: Callable[[_T], _Co], parser: Parser[_T], /) -> Parser[_Co]:
+    def _map_parser(source: object) -> _Co:
+        return fn(parser(source))
+
+    return _map_parser
