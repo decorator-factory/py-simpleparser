@@ -13,6 +13,64 @@ This library stems from my dissatisfaction with the popular existing solutions.
 1. Make sure you're using Python >= 3.9
 2. Copy the `humbleparser.py` file from this repository into your project
 
+## Philosophy and rationale
+
+:bulb: Make sure to read the tutorial first. But I'm not gonig to stop you :^)
+
+<details>
+  <summary>What gives?</summary>
+
+This library stems from my general dissatisfaction with popular existing Python solutions to the very common
+problem of parsing unstructured data.
+
+- **Parsing type annotations** is... complicated. Python doesn't provide a nice framework to do that, and
+  it's generally a mess. How do you automatically generate a parser for a generic class, respecting its variance?
+  I'll sleep better at night without such knowledge.
+
+- ...but type checkers are kinda nice. Unfortunately, in Python there's no way to make a nice declarative tool like
+  [zod from TypeScript](https://zod.dev/) where types are inferred from the schema, not the other way around.
+
+- Implicit coercions. That's a bad default. The good default is rejecting invalid data.
+
+  > I want a string, but you send me an integer. I am not going to guess what you meant,
+  > there's something wrong on your side.
+
+  If you want the rules to be more relaxed, specify where and how lax you want to be explicitly.
+
+  > Explicit is better than implicit.
+  >
+  > Errors should never pass silently.
+  >
+  > Unless explicitly silenced.
+
+- **Simple cases and complex cases**. It's easy to optimize for the simple case of needing to map a JSON with 5 fields
+  to a `dataclass` of 5 fields with the same names. However, the real world is often more complicated.
+
+  Data can be more complicated.
+
+  Maybe your data uses `camelCase` for names. Or maybe `PascalCase`. If it's using `PascalCase`, should
+  HTTPClient be `h_t_t_p_client` or `http_client`, and what about `IAmAMD`
+  ('I am a [M.D.](https://en.wikipedia.org/wiki/Doctor_of_Medicine)')?
+
+  The data might contain flat data that you want to be nested. It's pretty reasonable to group `{"x", "y"}` to a single `pos`
+  attribute. (Or vice versa --- flatten something that's nested in the raw representation)
+
+  There's no standard way to represent tagged unions (sum types, variant record, whatever) in JSON/YAML.
+  In fact, Telegram has at least two ways of doing so.
+  [Some developers](https://discord.com/developers/docs/resources/channel#message-object) apparently don't believe in
+  tagged unions, and instead model their data as a record with 30 optional fields :facepalm: . The Rust library [`serde`](https://serde.rs/enum-representations.html) has some solutions to this, but I haven't seen anything similar in Python.
+
+
+This is the kind of philosphy I like:
+
+> Here's the recipe to solve 90% of your problems. It'a a bit more wordy than just slapping on a decorator or
+> inheriting from a base class, but it's simple code. If you want something more complicated, use the
+> Turing-complete language we already have to express your custom bits.
+
+So this project is not much of a library, but an alternative way of accomplishing this very common task.
+
+</details>
+
 ## Tutorial
 
 For an introduction, we are going to implement a module that works with a small part of [Telegram's Bot API](https://core.telegram.org/bots/api), namely the [`Update` object](https://core.telegram.org/bots/api#update).
