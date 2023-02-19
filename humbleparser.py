@@ -40,6 +40,8 @@ __all__ = (
     "is_any_of",
     "is_any_of_described",
     "is_variant",
+    "is_variant_with_fallback",
+    "is_anything",
     "dump_error_value_human",
     "dump_error_value_nested",
 )
@@ -300,3 +302,27 @@ def is_variant(
             return variant(source)
 
     return _is_variant
+
+
+def is_variant_with_fallback(
+    is_tag: Parser[_U],
+    variants: Mapping[_U, Parser[_T]],
+    fallback: Callable[[_U], Parser[_T]],
+) -> Parser[_T]:
+    def _is_variant(source: object) -> _T:
+        with apply_note("Variant tag"):
+            tag = is_tag(source)
+
+        if tag in variants:
+            variant = variants[tag]
+        else:
+            variant = fallback(tag)
+
+        with apply_note(str(tag)):
+            return variant(source)
+
+    return _is_variant
+
+
+def is_anything(source: object) -> object:
+    return source
