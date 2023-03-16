@@ -65,7 +65,8 @@ This is the kind of philosphy I like:
 > inheriting from a base class, but it's simple code. If you want something more complicated, use the
 > Turing-complete language we already have to express your custom bits.
 
-So this project is not much of a library, but an alternative way of accomplishing this very common task.
+So this project is not much of a library, it's mostly a suggestion to take an alternative approach to parsing
+untrusted data using simpler tools that you already have.
 
 </details>
 
@@ -558,7 +559,7 @@ def is_update_body(source: object) -> UpdateBody:
 
 A short recap on `humbleparser`:
 
-- A parser is a function that accepts an objects and either returns its parsed version, or raises `ParseError`
+- A parser is a function that accepts an object and either returns its parsed version, or raises `ParseError`
 - To parse a dictionary with known fields, use `has_field`
 - If the field can be missing, use `has_optional_field` instead
 - To try several options in order, use `any_of`
