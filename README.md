@@ -2,14 +2,14 @@
 >
 > &mdash; someone, probably
 
-# py-humbleparser
+# py-simpleparser
 
 This is a post-modern Python library for parsing/validating unstructured data, such as JSON returned by an HTTP server or a YAML configuration.
 
 ## Installation
 
 1. Make sure you're using Python >= 3.9
-2. Copy the `humbleparser.py` file from this repository into your project
+2. Copy the `simpleparser.py` file from this repository into your project
 
 ## Philosophy and rationale
 
@@ -155,7 +155,7 @@ class Chat:
 ```
 And here's how you parse a `Message`:
 ```py
-from humbleparser import (
+from simpleparser import (
     is_any_of,
     is_int,
     is_str,
@@ -239,9 +239,9 @@ Traceback (most recent call last):
   File "/.../tutorial.py", line 43, in is_message
     author=is_any_of(
            ^^^^^^^^^^
-  File "/.../humbleparser.py", line 289, in _is_any_of
+  File "/.../simpleparser.py", line 289, in _is_any_of
     raise ParseError(MultipleErrors(tuple(errors)))
-humbleparser.ParseError: all possibilities failed:
+simpleparser.ParseError: all possibilities failed:
     - at key 'sender_chat': Key 'sender_chat' not found
     - at key 'from': at key 'first_name': expected a string, got <class 'int'>
 ```
@@ -249,7 +249,7 @@ humbleparser.ParseError: all possibilities failed:
 ### Parsing the `UpdateBody`
 
 ```py
-from humbleparser import map_parser, is_always
+from simpleparser import map_parser, is_always
 
 def is_update_body(source: object) -> UpdateBody:
     return is_any_of(
@@ -261,7 +261,7 @@ def is_update_body(source: object) -> UpdateBody:
 Hm... actually, we're not doing anything with the source besides passing it to other parsers.
 Let's refactor our code slightly:
 ```py
-from humbleparser import is_anything
+from simpleparser import is_anything
 
 is_update_body = is_any_of(
     map_parser(NewMessage, has_field("message", is_message)),
@@ -276,7 +276,7 @@ is_update_body = is_any_of(
 This `is_any_of` is useful when you have few options, but the error message will not be very clear
 with 10 variants. We can give each "branch" a name:
 ```py
-from humbleparser import is_any_of_described
+from simpleparser import is_any_of_described
 
 is_update_body = is_any_of_described(
     (
@@ -343,7 +343,7 @@ Update(update_id=258, body=UnsupportedUpdate(raw={'update_id': 258, 'unknown_upd
 >>> is_update({"update_id": "yes!"})
 Traceback (most recent call last):
 ...
-humbleparser.ParseError: at key 'update_id': expected integer, got <class 'str'>
+simpleparser.ParseError: at key 'update_id': expected integer, got <class 'str'>
 ```
 
 </details>
@@ -370,7 +370,7 @@ to accept more updates:
 Here's one way you can solve the second problem:
 
 ```py
-from humbleparser import is_dict
+from simpleparser import is_dict
 
 def is_update_body(source: object) -> UpdateBody:
     raw_dict = is_dict(source)
@@ -389,7 +389,7 @@ This is still not perfect, we're going to accept updates which have both a `mess
 We can solve both of these problems with a dictionary lookup:
 
 ```py
-from humbleparser import Expectation
+from simpleparser import Expectation
 
 
 _known_events = {
@@ -455,7 +455,7 @@ Another point is that we might want to still process updates that weren't quite 
 we want to keep track of update statistics in `process_update`, or something else.
 
 ```diff
-+ from humbleparser improt ErrorValue
++ from simpleparser improt ErrorValue
 
 + @dataclass(frozen=True)
 + class InvalidUpdateReceived:
@@ -557,7 +557,7 @@ def is_update_body(source: object) -> UpdateBody:
 
 ### Conclusion
 
-A short recap on `humbleparser`:
+A short recap on `simpleparser`:
 
 - A parser is a function that accepts an object and either returns its parsed version, or raises `ParseError`
 - To parse a dictionary with known fields, use `has_field`
